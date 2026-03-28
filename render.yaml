@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: ai-pro-max-ultra
+    env: node
+    buildCommand: npm install
+    startCommand: node backend/server.js
