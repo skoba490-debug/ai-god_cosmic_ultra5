@@ -2,81 +2,71 @@ const chat = document.getElementById("chat");
 let listening = false;
 let recognition;
 
-// новый чат
 function newChat() {
   chat.innerHTML = "";
 }
 
-// отправка
-async function send(){
+async function send() {
   const text = input.value;
-  if(!text) return;
+  if (!text) return;
 
-  addMsg(text, "user");
+  addMsg(text, 'user');
   input.value = "";
 
   await sendToAI(text);
 }
 
-// вывод сообщений
-function addMsg(text, type){
+function addMsg(text, type) {
   chat.innerHTML += `<div class="msg ${type}">${text}</div>`;
   chat.scrollTop = chat.scrollHeight;
 }
 
-// AI запрос
-async function sendToAI(text){
-  const res = await fetch("/api/chat", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({message:text})
+async function sendToAI(text) {
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: text })
   });
 
   const data = await res.json();
-
-  addMsg(data.reply, "ai");
+  addMsg(data.reply, 'ai');
   speak(data.reply);
 }
 
-// 🔊 голос
-function speak(text){
+function speak(text) {
   const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "ru-RU";
-
+  utter.lang = 'ru-RU';
   utter.onend = () => {
     if (listening) startListening();
   };
-
   speechSynthesis.speak(utter);
 }
 
-// 🎤 voice mode
-function toggleVoice(){
+function toggleVoice() {
   listening = !listening;
-  if(listening) startListening();
-  else if(recognition) recognition.stop();
+  if (listening) startListening();
+  else if (recognition) recognition.stop();
 }
 
-function startListening(){
+function startListening() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
   if (!SpeechRecognition) {
-    alert("Нет поддержки голоса");
+    alert('Голос не поддерживается в этом браузере');
     return;
   }
-
   recognition = new SpeechRecognition();
-  recognition.lang = "ru-RU";
+  recognition.lang = 'ru-RU';
+  recognition.continuous = false;
 
   recognition.start();
 
-  recognition.onresult = async (e)=>{
+  recognition.onresult = async (e) => {
     const text = e.results[0][0].transcript;
-    addMsg("🎤 " + text, "user");
+    addMsg('🎤 ' + text, 'user');
     await sendToAI(text);
   };
 
-  recognition.onend = ()=>{
-    if(listening) startListening();
+  recognition.onend = () => {
+    if (listening) startListening();
   };
 }
