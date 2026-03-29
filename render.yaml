@@ -2,4 +2,4 @@ services:
  - type: web
    env: node
    buildCommand: npm install
-   startCommand: node backend/server.js
+   startCommand: node
